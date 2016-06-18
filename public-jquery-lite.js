@@ -1,26 +1,18 @@
-function $l(selector) {
+function $l(input) {
   this.queueFunctions = [];
 
-  switch (selector.constructor) {
-    case String:
-      console.log("selected a string");
-      let nodeList = Array.from(document.querySelectorAll(selector));
-      let dom = new DOMNodeCollection(nodeList);
-      return dom;
-    case HTMLElement:
-    console.log("selected a html element");
-      let arr = [];
-      arr.push(selector);
-      return new DOMNodeCollection(arr);
-    case Function:
-      this.queueFunctions.push(selector);
-      const onReady = () => {
-        this.queueFunctions.forEach( func => func() );
-      };
-      document.addEventListener("DOMContentLoaded", onReady.bind(this));
-      break;
-    default:
-      break;
+  if (input.constructor === String) {
+    const nodeList = Array.from(document.querySelectorAll(input));
+    console.log(nodeList);
+    return new DOMNodeCollection(nodeList);
+  } else if (input instanceof HTMLElement) {
+    return new DOMNodeCollection([input]);
+  } else if (input instanceof Function) {
+    this.queueFunctions.push(input);
+    const onReady = () => {
+      this.queueFunctions.forEach( func => func() );
+    };
+    document.addEventListener("DOMContentLoaded", onReady.bind(this));
   }
 }
 
@@ -88,7 +80,7 @@ DOMNodeCollection.prototype.empty = function () {
 
 DOMNodeCollection.prototype.append = function (object) {
   if(object.constructor === DOMNodeCollection){
-    object.forEach( element => {
+    object.nodeList.forEach( element => {
       this.nodeList.forEach( node => {
         node.innerHTML = node.innerHTML + element.outerHTML;
       });
